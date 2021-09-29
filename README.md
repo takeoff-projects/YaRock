@@ -1,1 +1,2 @@
-# go-pets
+# YaRock
+Yaroslav Kitaroha GCP training project
