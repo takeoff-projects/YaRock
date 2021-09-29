@@ -38,6 +38,17 @@ resource "google_service_account_key" "sa_key" {
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
+# Set permissions
+resource "google_project_iam_binding" "service_permissions" {
+  for_each = toset([
+    "run.invoker", "datastore.owner","appengine.appAdmin"
+  ])
+
+  role       = "roles/${each.key}"
+  members    = [local.service-account]
+  depends_on = [google_service_account.service-account-2]
+}
+
 # Enables the Datastore
 resource "google_project_service" "datastore" {
   service = "datastore.googleapis.com"
@@ -79,6 +90,10 @@ resource "google_cloud_run_service" "service" {
 
       containers {
         image = data.google_container_registry_image.image.image_url
+        env {
+          name = "GOOGLE_CLOUD_PROJECT"
+          value = var.project
+        }
       }
     }
   }
