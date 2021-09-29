@@ -17,7 +17,7 @@ locals {
   service_name   = "pets"
 
   deployment_name = "YaRock-pets"
-  service-account  = "serviceAccount:${google_service_account.service-account.email}"
+  service-account  = "serviceAccount:${google_service_account.service-account-2.email}"
 }
 
 # Enables the Identity and Access Management (IAM) API
@@ -27,14 +27,14 @@ resource "google_project_service" "iam" {
 }
 
 # Create a service account
-resource "google_service_account" "service-account" {
-  account_id   = "service-account"
+resource "google_service_account" "service-account-2" {
+  account_id   = "service-account-2"
   display_name = "YaRock-pets Service Account"
 }
 
 # Create new SA key
 resource "google_service_account_key" "sa_key" {
-  service_account_id = google_service_account.service-account.name
+  service_account_id = google_service_account.service-account-2.name
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
@@ -75,7 +75,7 @@ resource "google_cloud_run_service" "service" {
 
   template {
     spec {
-      service_account_name = google_service_account.service-account.email
+      service_account_name = google_service_account.service-account-2.email
 
       containers {
         image = data.google_container_registry_image.image.image_url
