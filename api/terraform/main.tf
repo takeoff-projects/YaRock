@@ -17,7 +17,7 @@ locals {
   service_name   = "go-api"
 
   deployment_name = "YaRock-api"
-  service-account  = "serviceAccount:${google_service_account.service-account-1.email}"
+  service-account  = "serviceAccount:${google_service_account.service-account-3.email}"
   url = google_cloud_run_service.service.status[0].url
 }
 
@@ -28,14 +28,14 @@ resource "google_project_service" "iam" {
 }
 
 # Create a service account
-resource "google_service_account" "service-account-1" {
-  account_id   = "service-account-1"
+resource "google_service_account" "service-account-3" {
+  account_id   = "service-account-3"
   display_name = "YaRock-pets Service Account"
 }
 
 # Create new SA key
 resource "google_service_account_key" "sa_key" {
-  service_account_id = google_service_account.service-account-1.name
+  service_account_id = google_service_account.service-account-3.name
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
@@ -47,7 +47,7 @@ resource "google_project_iam_binding" "service_permissions" {
 
   role       = "roles/${each.key}"
   members    = [local.service-account]
-  depends_on = [google_service_account.service-account-1]
+  depends_on = [google_service_account.service-account-3]
 }
 
 # Enables the Cloud Build
@@ -81,7 +81,7 @@ resource "google_cloud_run_service" "service" {
 
   template {
     spec {
-      service_account_name = google_service_account.service-account-1.email
+      service_account_name = google_service_account.service-account-3.email
 
       containers {
         image = data.google_container_registry_image.image.image_url
@@ -120,8 +120,8 @@ resource "google_cloud_run_service_iam_policy" "noauth_policy" {
   depends_on  = [google_cloud_run_service.service]
 }
 
-data "local_file" "openapi_config_file" {
-  filename = "${path.module}/openapi_config_file.yml"
+data "template_file" "openapi_config_file" {
+  template = file("${path.module}/openapi_config_file.yml")
   vars = {
     host  = replace(local.url, "https://", "")
     address = local.url
@@ -131,7 +131,7 @@ data "local_file" "openapi_config_file" {
 resource "google_endpoints_service" "openapi_service" {
   service_name   = replace(local.url, "https://", "")
   project        = var.project
-  openapi_config = data.local_file.openapi_config_file.content
+  openapi_config = data.template_file.openapi_config_file.rendered
 
   depends_on  = [google_cloud_run_service.service]
 }
