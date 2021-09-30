@@ -1,0 +1,72 @@
+swagger: "2.0"
+info:
+  title: API
+  description: API
+  version: 1.0.0
+host: ${host}
+schemes:
+  - https
+produces:
+  - application/json
+x-google-backend:
+  address: ${address}
+  protocol: h2
+paths:
+  /api/messages:
+    get:
+      operationId: get-messages
+      summary: Get messages
+      responses:
+        '200':
+          description: Response
+          schema:
+            type: array
+            items:
+              type: string
+    post:
+      operationId: post-message
+      summary: Post message
+      parameters:
+        - in: body
+          name: message
+          description: Post message
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Test message
+      responses:
+        '200':
+          description: Response
+          schema:
+            type: string
+  /api/messages/{id}:
+    get:
+      operationId: get-message
+      summary: Get message by ID
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Id of message to get
+      responses:
+        '200':
+          description: Response
+          schema:
+            type: string
+    delete:
+      operationId: delete-message
+      summary: Delete message
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Id of message to get
+      responses:
+        '200':
+          description: Response
+          schema:
+            type: string

@@ -120,83 +120,18 @@ resource "google_cloud_run_service_iam_policy" "noauth_policy" {
   depends_on  = [google_cloud_run_service.service]
 }
 
+data "local_file" "openapi_config_file" {
+  filename = "${path.module}/openapi_config_file.yml"
+  vars = {
+    host  = replace(local.url, "https://", "")
+    address = local.url
+  }
+}
+
 resource "google_endpoints_service" "openapi_service" {
   service_name   = replace(local.url, "https://", "")
   project        = var.project
-  openapi_config = <<EOF
-    swagger: '2.0'
-    info:
-      title: Cloud Endpoints + Cloud Run
-      description: Sample API on Cloud Endpoints with a Cloud Run backend
-      version: 1.0.0
-    host: "${replace(local.url, "https://", "")}"
-    schemes:
-      - https
-    produces:
-      - application/json
-    x-google-backend:
-      address: "${local.url}"
-      protocol: h2
-    paths:
-      /api/messages:
-        get:
-          operationId: get-messages
-          summary: Get messages
-          responses:
-            '200':
-              description: A successful response
-              schema:
-                type: array
-                items:
-                  type: string
-        post:
-          operationId: post-message
-          summary: Post message
-          parameters:
-            - in: body
-              name: message
-              description: The message to create.
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Test message
-          responses:
-            '200':
-              description: A successful response
-              schema:
-                type: string
-      /api/messages/{id}:
-        get:
-          operationId: get-message
-          summary: Get message
-          parameters:
-            - in: path
-              name: id
-              type: string
-              required: true
-              description: id of message to get
-          responses:
-            '200':
-              description: A successful response
-              schema:
-                type: string
-        delete:
-          operationId: delete-message
-          summary: Delete message
-          parameters:
-            - in: path
-              name: id
-              type: string
-              required: true
-              description: id of message to get
-          responses:
-            '200':
-              description: A successful response
-              schema:
-                type: string
-  EOF
+  openapi_config = data.local_file.openapi_config_file.content
 
   depends_on  = [google_cloud_run_service.service]
 }
