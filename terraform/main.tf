@@ -55,6 +55,35 @@ resource "google_project_service" "datastore" {
   disable_on_destroy = false
 }
 
+# resource "google_project_service" "enable_firestore" {
+#   provider = google
+#   project = var.project
+#   service = "firestore.googleapis.com"
+
+#   disable_on_destroy = false
+# }
+
+# resource "google_datastore_index" "pets-db-1" {
+#   kind = "pets-db-1"
+#   properties {
+#     name = "added"
+#     direction = "ASCENDING"
+#   }
+
+#   properties {
+#     name = "caption"
+#     direction = "ASCENDING"
+#   }
+#   depends_on = [google_project_service.enable_firestore]
+# }
+
+# # configure Datastore
+# resource "google_app_engine_application" "pets-db-1" {
+#   provider      = google
+#   location_id   = "us-central"
+#   database_type = "CLOUD_DATASTORE_COMPATIBILITY"
+# }
+
 # Enables the Cloud Build
 resource "google_project_service" "cloudbuild" {
   service = "cloudbuild.googleapis.com"
